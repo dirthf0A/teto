@@ -1,8 +1,8 @@
 # Teto ASM
 
-Open-source **Attack Surface Management (ASM) platform** for discovering, monitoring, and securing external assets.
+Open-source **Attack Surface Management (ASM) platform** for discovering, monitoring, and securing internet-facing assets.
 
-Teto helps security teams, pentesters, and bug bounty hunters automatically map their attack surface and detect vulnerabilities across domains, services, and infrastructure.
+Teto automatically maps your organization's external attack surface and continuously scans it for vulnerabilities.
 
 ---
 
@@ -13,13 +13,13 @@ Modern organizations expose many assets to the internet:
 • domains  
 • subdomains  
 • APIs  
-• cloud services  
-• exposed ports  
+• cloud infrastructure  
+• exposed services  
 • web applications  
 
-Teto continuously discovers these assets and scans them for vulnerabilities using industry-standard reconnaissance tools.
+Teto discovers these assets automatically and monitors them for security issues.
 
-The platform builds an **asset inventory**, tracks **changes in attack surface**, and generates **security findings with risk scoring**.
+The platform builds a **centralized asset inventory**, tracks **changes in attack surface**, and identifies **security vulnerabilities with risk scoring**.
 
 ---
 
@@ -27,30 +27,30 @@ The platform builds an **asset inventory**, tracks **changes in attack surface**
 
 ### Asset Discovery
 
-Automatically discovers external assets:
+Automatically discovers:
 
-• root domains  
 • subdomains  
 • IP addresses  
 • services and ports  
-• web endpoints  
-• cloud assets
+• web applications  
+• cloud buckets  
+• endpoints
 
 Discovery sources include:
 
 - certificate transparency
 - passive DNS
-- ASN range expansion
-- JS file extraction
+- ASN range discovery
+- JavaScript extraction
 - subdomain permutations
-- cloud bucket discovery
 
 ---
 
 ### Vulnerability Scanning
 
-Detects vulnerabilities across discovered assets using:
+Teto integrates well-known security scanning tools including:
 
+- :contentReference[oaicite:0]{index=0}
 - :contentReference[oaicite:1]{index=1}
 - :contentReference[oaicite:2]{index=2}
 - :contentReference[oaicite:3]{index=3}
@@ -58,20 +58,17 @@ Detects vulnerabilities across discovered assets using:
 - :contentReference[oaicite:5]{index=5}
 - :contentReference[oaicite:6]{index=6}
 - :contentReference[oaicite:7]{index=7}
-- :contentReference[oaicite:8]{index=8}
 
 Scanning pipeline:
 
 
 domain
 ↓
-passive discovery
+subdomain discovery
 ↓
 DNS resolution
 ↓
 service detection
-↓
-HTTP probing
 ↓
 web crawling
 ↓
@@ -84,59 +81,43 @@ vulnerability scanning
 
 # Architecture
 
-High-level architecture:
 
-          User
-           │
-       REST API
-       (FastAPI)
-           │
-  ┌────────┴────────┐
-  │                 │
-
-Asset Discovery Scan Engine
-│ │
-└────────┬────────┘
+User
+│
+Web Dashboard
+│
+API (FastAPI)
 │
 Worker Queue
 │
+Workers
+│
 Database
-(assets, scans, findings)
 
 
 Main components:
 
-• API server  
-• distributed workers  
+• Web dashboard  
+• REST API  
+• scanning workers  
 • scheduler  
-• database  
-• optional web dashboard
+• asset database
 
 ---
 
-# Repository Structure
+# Screenshots
+
+(you can add screenshots here)
 
 
-teto/
-├── app/
-│ ├── api/
-│ ├── models/
-│ ├── scanners/
-│ ├── tasks/
-│ └── core/
-│
-├── frontend/
-│
-├── frontend-next/
-│
-├── docs/
-│
-└── docker-compose.yml
+docs/screenshots/dashboard.png
+docs/screenshots/assets.png
+docs/screenshots/vulnerabilities.png
 
 
 ---
 
-# Quick Start
+# Installation
 
 Clone repository:
 
@@ -159,110 +140,13 @@ Install dependencies:
 pip install -e .
 
 
-Start API server:
+Start the backend server:
 
 
 uvicorn app.main:app --reload
 
 
-API will start on:
-
-
-http://127.0.0.1:8000
-
-
----
-
-# Register Organization
-
-Create an organization and admin user.
-
-
-curl -X POST http://127.0.0.1:8000/auth/register
-
--H "Content-Type: application/json"
--d '{"org_name":"Acme","email":"admin@acme.com
-","password":"change-me-now"}'
-
-
-Response will include a **JWT token**.
-
----
-
-# Asset Ingestion
-
-Add a domain to the platform:
-
-
-curl -X POST http://127.0.0.1:8000/assets/ingest
-
--H "Authorization: Bearer <token>"
--H "Content-Type: application/json"
--d '{"domain":"example.com","environment":"prod"}'
-
-
----
-
-# Start a Scan
-
-
-curl -X POST http://127.0.0.1:8000/scans
-
--H "Authorization: Bearer <token>"
--H "Content-Type: application/json"
--d '{"scan_type":"vuln"}'
-
-
-Secret scanning:
-
-
-curl -X POST http://127.0.0.1:8000/scans
-
--H "Authorization: Bearer <token>"
--d '{"scan_type":"secret"}'
-
-
----
-
-# Run Worker
-
-Workers process scan jobs.
-
-
-python -m app.tasks.worker
-
-
-Workers execute:
-
-• asset discovery  
-• vulnerability scans  
-• secret scans  
-
-Multiple workers can run in parallel.
-
----
-
-# Run Scheduler
-
-Scheduler runs continuous monitoring.
-
-
-python -m app.tasks.scheduler
-
-
-Default schedule:
-
-
-Asset discovery → every 6 hours
-Vulnerability scan → daily
-Deep scan → weekly
-
-
----
-
-# Dashboard
-
-Run React dashboard:
+Start the dashboard:
 
 
 cd frontend
@@ -270,62 +154,131 @@ npm install
 npm run dev
 
 
-Run Next.js dashboard:
+Open the web interface:
 
 
-cd frontend-next
-npm install
-npm run dev
+http://localhost:3000
 
+
+---
+
+# Using the Platform
+
+All operations are performed through the **web dashboard**.
+
+---
+
+# 1. Create Organization
+
+Open the dashboard and create an organization and admin user.
+
+This account will manage assets and scans.
+
+---
+
+# 2. Add Assets
+
+Navigate to:
+
+
+Assets → Add Domain
+
+
+Enter a root domain:
+
+
+example.com
+
+
+The platform will automatically start asset discovery.
+
+---
+
+# 3. Run a Scan
+
+Go to:
+
+
+Scans → New Scan
+
+
+Select scan type:
+
+• Asset Discovery  
+• Vulnerability Scan  
+• Secret Scan  
+
+Start the scan.
+
+Workers will process the job in background.
+
+---
+
+# 4. View Results
+
+Scan results appear in the dashboard.
+
+You can explore:
+
+
+Assets
+Services
+Endpoints
+Vulnerabilities
+Asset Changes
+
+
+Each finding includes:
+
+• severity  
+• description  
+• affected asset  
+• remediation hints
 
 ---
 
 # Continuous Monitoring
 
-Teto tracks changes in the attack surface.
+Teto continuously monitors your attack surface.
 
-Examples:
+It detects:
 
 • new subdomains  
-• new services  
-• new open ports  
+• newly opened ports  
 • new endpoints  
-• new vulnerabilities
+• new vulnerabilities  
 
-Changes are stored in:
+Changes are tracked in:
 
 
 asset_history
 asset_changes
 
 
-Alerts can be triggered when changes are detected.
-
 ---
 
-# Alerts & Notifications
+# Alerts
 
-Supported integrations:
+Alerts can be sent via:
 
 • Email  
 • Slack  
 • Discord  
 • Webhooks  
 
-Example configuration:
+Configuration example:
 
 
 ASM_ALERTS_ENABLED=true
 ASM_SLACK_WEBHOOK=
 ASM_DISCORD_WEBHOOK=
-ASM_ALERT_WEBHOOK=
 
 
 ---
 
 # Risk Scoring
 
-Findings are scored based on severity:
+Findings are scored using severity weights:
 
 | Severity | Score |
 |--------|------|
@@ -335,40 +288,17 @@ Medium | 20 |
 Low | 5 |
 Info | 1 |
 
-Additional factors:
+Additional risk factors:
 
 • asset exposure  
-• service type  
-• asset importance
-
----
-
-# Environment Configuration
-
-Example environment variables:
-
-
-ASM_JWT_SECRET=change-me
-ASM_SCAN_RATE=100
-ASM_QUEUE_BACKEND=redis
-REDIS_URL=redis://localhost:6379
-
-
-Scanner configuration:
-
-
-ASM_SUBFINDER_ARGS
-ASM_AMASS_ARGS
-ASM_HTTPX_ARGS
-ASM_NAABU_ARGS
-ASM_NUCLEI_ARGS
-
+• asset importance  
+• service type
 
 ---
 
 # Distributed Scanning
 
-For large scans, run multiple workers.
+Large environments can run multiple workers.
 
 Example:
 
@@ -376,40 +306,25 @@ Example:
 docker-compose up --scale worker=10
 
 
-Workers will pull jobs from queue.
+Workers will process scanning jobs concurrently.
 
 ---
 
 # Deployment
 
-Run with Docker:
+Run using Docker:
 
 
 docker-compose up --build
 
 
-This will start:
+This starts:
 
 • API server  
-• worker nodes  
+• workers  
 • scheduler  
-• database
-
----
-
-# Security
-
-Important recommendations:
-
-• never expose API without authentication  
-• set strong JWT secret  
-• restrict scanning permissions  
-
-Example:
-
-
-ASM_JWT_SECRET=<secure-random-value>
-
+• database  
+• dashboard
 
 ---
 
@@ -417,11 +332,11 @@ ASM_JWT_SECRET=<secure-random-value>
 
 Future improvements:
 
-• asset graph visualization  
-• Kubernetes deployment  
-• SaaS mode  
-• AI vulnerability prioritization  
-• large scale distributed scanning  
+• attack surface graph  
+• SaaS deployment  
+• Kubernetes support  
+• advanced analytics  
+• AI-assisted vulnerability prioritization
 
 ---
 
@@ -433,6 +348,6 @@ MIT License
 
 # Disclaimer
 
-This tool is intended for **authorized security testing only**.
+This project is intended for **authorized security testing only**.
 
 Do not scan systems without permission.
