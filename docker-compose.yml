@@ -1,0 +1,93 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: asm
+      POSTGRES_USER: asm
+      POSTGRES_PASSWORD: asm
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U asm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redisdata:/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://asm:asm@postgres:5432/asm
+      REDIS_URL: redis://redis:6379/0
+      ASM_QUEUE_BACKEND: redis
+      ASM_ALLOW_STUBS: "true"
+      ASM_ENV: "dev"
+      ASM_ASSET_SCAN_INTERVAL_HOURS: "6"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    command: python -m workers.discovery_worker
+    environment:
+      DATABASE_URL: postgresql+psycopg://asm:asm@postgres:5432/asm
+      REDIS_URL: redis://redis:6379/0
+      ASM_QUEUE_BACKEND: redis
+      ASM_ALLOW_STUBS: "true"
+      ASM_ENV: "dev"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    command: python -m workers.scheduler
+    environment:
+      DATABASE_URL: postgresql+psycopg://asm:asm@postgres:5432/asm
+      REDIS_URL: redis://redis:6379/0
+      ASM_QUEUE_BACKEND: redis
+      ASM_ALLOW_STUBS: "true"
+      ASM_ENV: "dev"
+      ASM_ASSET_SCAN_INTERVAL_HOURS: "6"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    environment:
+      NEXT_PUBLIC_API_BASE: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  redisdata:

@@ -1,0 +1,19 @@
+[project]
+name = "asm-platform"
+version = "0.1.0"
+description = "Attack surface management and vulnerability scanning platform skeleton."
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn>=0.23",
+  "sqlalchemy>=2.0",
+  "pydantic>=2.5",
+  "apscheduler>=3.10",
+  "psycopg[binary]>=3.1",
+  "python-jose[cryptography]>=3.3",
+  "passlib[bcrypt]>=1.7",
+  "slowapi>=0.1.9",
+  "redis>=5.0",
+  "reportlab>=4.0",
+  "stripe>=9.0",
+]
