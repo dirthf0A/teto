@@ -105,15 +105,10 @@ Main components:
 
 ---
 
-# Screenshots
-
-(you can add screenshots here)
-
-
-docs/screenshots/dashboard.png
-docs/screenshots/assets.png
-docs/screenshots/vulnerabilities.png
-
+# Screenshots:
+-
+-
+-
 
 ---
 
